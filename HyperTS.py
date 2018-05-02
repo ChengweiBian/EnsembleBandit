@@ -12,8 +12,7 @@ def getClusters(fileNameWriteCluster):
             vec = []
             line = line.split(' ')
             for i in range(len(line) - 1):
-                print
-                line
+                print line
                 vec.append(float(line[i]))
             clusters.append(np.asarray(vec))
         return np.asarray(clusters)
@@ -59,10 +58,8 @@ if __name__ == '__main__':
         randomLearnCTR = random_model.learn_stats.getCTR()
         CTR = model.learn_stats.getCTR()
 
-        print
-        totalObservations
-        print
-        'random', randomLearnCTR, model.name, CTR
+        print totalObservations
+        print 'random', randomLearnCTR, model.name, CTR
 
         recordedStats = [randomLearnCTR, CTR]
         # write to file
@@ -129,13 +126,11 @@ if __name__ == '__main__':
                     s = str(totalObservations) + ' ' + str(base) + ' ' + str(model1.learn_stats.getCTR()) + ' ' + str(
                         model2.learn_stats.getCTR()) + ' ' + str(model3.learn_stats.getCTR()) + ' ' + str(
                         model.learn_stats.getCTR())
-                    print
-                    s
+                    print s
                     s = str(totalObservations) + ' ' + str(model1.learn_stats.getCTR() / base) + ' ' + str(
                         model2.learn_stats.getCTR() / base) + ' ' + str(model3.learn_stats.getCTR() / base) + ' ' + str(
                         model.learn_stats.getCTR() / base)
-                    print
-                    s
+                    print s
                     output.append(s)
 
         # printWrite()
