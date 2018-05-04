@@ -285,16 +285,58 @@ class Ensemble:
 
         return article_picked
 
-        
-           
+
+class Arm:
+    def __init__(self, d):
+        self.d = d
+        self.A = np.identity(d)
+        self.b = np.zeros(d)
+        self.Ainv = np.linalg.inv(self.A)
+        self.thetaHat = np.dot(self.Ainv, self.b)
+
+    def update(self, x, r):
+        x = np.array(x)
+        self.A += np.outer(x, x)
+        self.b += r * x
+        self.Ainv = np.linalg.inv(self.A)
+        self.thetaHat = self.Ainv.dot(self.b)
+
+    def getP(self, x, alpha):
+        x = np.array(x)
+        return np.dot(self.thetaHat, x) + alpha * np.sqrt(np.dot(np.dot(x, self.Ainv), x))
 
 
+# ensemble model
+class HyperLinUCB:
+    def __init__(self, alpha, lambda_, d, Gepsilon, userNum, userFeatureVectors):
+        self.name = 'HyperLinUCB'
+        self.learn_stats = articleAccess()
+        self.alpha = alpha
+        self.d = d
 
+        self.model = []
+        self.model.append(LinUCBStruct(alpha, lambda_, d, userNum))
+        self.model.append(CoLinUCBStruct(alpha, lambda_ , d, userNum, userFeatureVectors))
+        self.model.append(GOBLinStruct(alpha, lambda_, d, Gepsilon, userNum,userFeatureVectors))
+        self.modelNum = len(self.model)
+        self.arms = [Arm(d) for _ in range(self.modelNum)]
 
+    def updateParameters(self, featureVector, click, modelID):
+        self.arms[modelID].update(featureVector, click)
 
+    def getPta(self, featureVector):
+        return [arm.getP(featureVector, self.alpha) for arm in self.arms]
 
+    def pick(self, pool_articles, userID, article_chosen, click, featureVector):
+        r = self.getPta(featureVector)
+        m = np.argmax(r) #choose model
+        # print 'choose model: ' + self.model[m].name
 
+        article_picked = self.model[m].pick(pool_articles, userID, article_chosen, click)
 
+        if article_picked == article_chosen:
+            self.learn_stats.addRecord(click)
+            self.updateParameters(featureVector, click, m)
 
-
+        return article_picked
 
